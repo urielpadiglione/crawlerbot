@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.urielpadiglione.crawlerbot.dto.BotOptionsDTO;
 import com.urielpadiglione.crawlerbot.dto.CrawlerResponseDTO;
 import com.urielpadiglione.crawlerbot.dto.SubredditsDTO;
 
@@ -24,7 +25,7 @@ public class CrawlerClient {
 	 * @Autowired Environment env;
 	 */
 	
-	public CrawlerResponseDTO crawlerClient(SubredditsDTO tags){
+	public CrawlerResponseDTO crawlerClient(SubredditsDTO tags, BotOptionsDTO botOptionsDTO){
 		try {
 
 			CrawlerResponseDTO crawlerResponseDTO = new CrawlerResponseDTO();
@@ -34,7 +35,7 @@ public class CrawlerClient {
 			
 			String subs = tags.getSubreddits().replace(";", "-");//<<<isso foi feito pois chamadas GET não aceitam ; como separador
 			
-			HttpEntity<CrawlerResponseDTO> response = restTemplate.exchange("http://localhost:8080/redditcrawler/api/get/"+subs,
+			HttpEntity<CrawlerResponseDTO> response = restTemplate.exchange("http://localhost:8080/redditcrawler/api/get/"+subs+"/"+botOptionsDTO.getUpvotes(),
 				    HttpMethod.GET, request, CrawlerResponseDTO.class);
 			
 			if(response!=null) {

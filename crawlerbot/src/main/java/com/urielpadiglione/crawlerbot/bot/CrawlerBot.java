@@ -10,35 +10,41 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.urielpadiglione.crawlerbot.client.CrawlerClient;
+import com.urielpadiglione.crawlerbot.dto.BotOptionsDTO;
 import com.urielpadiglione.crawlerbot.dto.CrawlerResponseDTO;
 import com.urielpadiglione.crawlerbot.dto.SubredditsDTO;
+import com.urielpadiglione.crawlerbot.service.CrawlerService;
 
 public class CrawlerBot extends TelegramLongPollingBot{
 	Logger logger = LoggerFactory.getLogger(CrawlerBot.class);
 	
 	/* @Autowired */
 	CrawlerClient crawlerClient = new CrawlerClient();
+	
+	@Autowired
+	CrawlerService crawlerService;
 
 	
 	@Override
 	public void onUpdateReceived(Update update) {
 		CrawlerResponseDTO resp = new CrawlerResponseDTO();
+		BotOptionsDTO config = new BotOptionsDTO();
 	
     try {
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			String message_text = update.getMessage().getText();
 			logger.info("Message received: "+message_text);
 			
-			if(message_text.equals("/nadaprafazer ") || message_text.equals("/nadaprafazer")) {
-				logger.info("Invalid request treated. Sending message to user.");
-				execute(this.getMessage("É necessário digitar um ou mais subreddits após o comando. Exemplo: \n"
-						+ "/nadaprafazer AskReddit;pics", update));
+			if(message_text.equals("/config")){
+				config = crawlerService.setConfig(config);
+				execute(this.getMessage("Configuração efetuada. Espero que saiba o que está fazendo ;)", update));
 			}
-			else if(message_text.contains("/nadaprafazer")) {
+			
+			if(!message_text.equals("")) {
 				SubredditsDTO subs = new SubredditsDTO();
-				message_text = message_text.replace("/nadaprafazer ", "");
+				
 				subs.setSubreddits(message_text);
-				resp = crawlerClient.crawlerClient(subs);
+				resp = crawlerClient.crawlerClient(subs, config);
 	      
 
 	        	if(resp==null) {
